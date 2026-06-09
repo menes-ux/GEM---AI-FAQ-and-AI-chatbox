@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enko Education - GEM FAQ</title>
+    <link rel="icon" type="image/png" href="ressources/white.png">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+      :root { --color-border-tertiary: #E8E9E5; }
+      html, body { height: 100%; margin: 0; background: #F5F6F4; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: 'Montserrat', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+      .enko-faq {
+        min-height: 100vh;
+        background: #F5F6F4;
+        border-radius: 0px;
+        overflow: hidden;
+        border: 0.5px solid var(--color-border-tertiary);
+        width: 100%;
+      }
+
+      .faq-header {
+        background: #509E2F;
+        padding: 36px 40px 32px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .faq-header-logo { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+      .faq-logo-img { height: 55px; width: auto; object-fit: contain; background: transparent; }
+      .logo-text { font-size: 14px; font-weight: 700; color: white; letter-spacing: 0.5px; }
+      .logo-text span { display: block; font-weight: 500; font-size: 12px; opacity: 0.9; margin-top: 4px; }
+      .faq-header h1 { font-size: 26px; font-weight: 800; color: white; line-height: 1.2; margin-bottom: 8px; }
+      .faq-header p { font-size: 13px; color: rgba(255,255,255,0.82); font-weight: 400; max-width: 520px; line-height: 1.6; }
+
+      .faq-search-bar { background: white; margin: 0 40px; margin-top: -20px; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; border: 1.5px solid #E0E1DD; box-shadow: 0 4px 16px rgba(0,0,0,0.08); position: relative; z-index: 2; }
+      .search-icon { color: #509E2F; font-size: 18px; }
+      .search-text { font-size: 13px; color: #aaa; font-weight: 400; width: 100%; }
+      .search-pill { margin-left: auto; background: #EEF7E9; color: #509E2F; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+      .faq-body { padding: 28px 40px 36px; }
+
+      .faq-category-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+      .tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1.5px solid #D0D1CC; color: #555; background: white; cursor: pointer; transition: all 0.2s ease; }
+      .tab.active { background: #509E2F; color: white; border-color: #509E2F; }
+
+      .faq-section-label { font-size: 10px; font-weight: 700; color: #509E2F; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; }
+
+      .faq-item { background: white; border-radius: 10px; border: 1px solid #E8E9E5; margin-bottom: 8px; overflow: hidden; }
+      .faq-item-header { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; }
+      .faq-item-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+      
+      .icon-green { background: #EEF7E9; color: #509E2F; }
+      .icon-gold { background: #FEF7E6; color: #C9920A; }
+      .icon-navy { background: #E8EBF6; color: #001871; }
+      .icon-red { background: #F5E6EA; color: #8A1538; }
+
+      .faq-question { font-size: 13px; font-weight: 600; color: #353735; line-height: 1.4; flex: 1; }
+      .faq-chevron { color: #aaa; font-size: 16px; flex-shrink: 0; transition: transform 0.2s ease; }
+
+      .faq-answer { padding: 0 18px 14px 60px; font-size: 12px; color: #666; line-height: 1.7; font-weight: 400; display: none; }
+      
+      .faq-item.open .faq-answer { display: block; }
+      .faq-item.open .faq-item-header { border-bottom: 1px solid #F0F1ED; }
+      .faq-item.open .faq-chevron { transform: rotate(180deg); color: #509E2F; }
+      .faq-item.open .faq-question { color: #509E2F; }
+
+      .faq-highlight-box { background: #353735; border-radius: 12px; padding: 18px 20px; margin-top: 20px; display: flex; align-items: center; gap: 16px; }
+      .highlight-icon { width: 40px; height: 40px; background: #509E2F; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
+      .highlight-text h3 { font-size: 13px; font-weight: 700; color: white; margin-bottom: 3px; }
+      .highlight-text p { font-size: 11px; color: rgba(255,255,255,0.75); line-height: 1.5; }
+      .highlight-btn { margin-left: auto; background: #509E2F; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-size: 11px; font-weight: 700; font-family: 'Montserrat', sans-serif; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+
+      .faq-footer { border-top: 1px solid #E8E9E5; padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; background: white; }
+      .footer-text { font-size: 11px; color: #aaa; font-weight: 500; }
+      .footer-link { font-size: 11px; color: #509E2F; font-weight: 600; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="enko-faq">
+  <div class="faq-header">
+    <div class="faq-header-logo">
+      <img src="ressources/white.png" alt="enko education logo" class="faq-logo-img">
+      <div class="logo-text"><span translate="no">enko education</span> <span>Germinating Educational Masters - GEM</span></div>
+    </div>
+    <h1>Got questions? We've got answers.</h1>
+    <p>Everything you need to know about joining Enko Education as a Germinating Educational Master — from application to first day.</p>
+  </div>
+
+  <div class="faq-search-bar">
+    <i class="ti ti-search search-icon" aria-hidden="true"></i>
+    <span class="search-text">Search a question, e.g. "What documents do I need?"</span>
+    <span class="search-pill">Search</span>
+  </div>
+
+  <div class="faq-body">
+    <div class="faq-category-tabs">
+      <div class="tab active" data-target="all">All</div>
+      <div class="tab" data-target="application">Application Info</div>
+      <div class="tab" data-target="platform">Platform Support</div>
+      <div class="tab" data-target="documents">Document Rules</div>
+      <div class="tab" data-target="recruitment">Recruitment & Pipeline</div>
+      <div class="tab" data-target="employment">Employment & Benefits</div>
+    </div>
+
+    <div class="faq-section" data-category="application">
+      <div class="faq-section-label">Application Information</div>
+    </div>
+
+    <div class="faq-section" data-category="platform" style="display: none;">
+      <div class="faq-section-label" style="margin-top:20px;">Platform Support</div>
+    </div>
+
+    <div class="faq-section" data-category="documents" style="display: none;">
+      <div class="faq-section-label" style="margin-top:20px;">Document Rules</div>
+    </div>
+
+    <div class="faq-section" data-category="recruitment" style="display: none;">
+      <div class="faq-section-label" style="margin-top:20px;">Recruitment & Pipeline</div>
+    </div>
+
+    <div class="faq-section" data-category="employment" style="display: none;">
+      <div class="faq-section-label" style="margin-top:20px;">Employment & Benefits</div>
+    </div>
+
+    <div class="faq-highlight-box">
+      <div class="highlight-icon"><i class="ti ti-message-circle"></i></div>
+      <div class="highlight-text">
+        <h3>Still have a question?</h3>
+        <p>Please contact gem@enkoeducation.com. We will respond within two working days. We strongly advise reaching out only for relevant recruitment queries.</p>
+      </div>
+      <button class="highlight-btn" onclick="window.location.href='mailto:gem@enkoeducation.com'">Contact GEM →</button>
+    </div>
+  </div>
+
+  <div class="faq-footer">
+    <span class="footer-text">Enko Education · GEM FAQ</span>
+    <a target="_blank" href="https://enko.smapply.org/" class="footer-link">Apply now →</a>
+  </div>
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
