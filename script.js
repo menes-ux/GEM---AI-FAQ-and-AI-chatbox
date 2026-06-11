@@ -38,12 +38,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabsContainer = document.querySelector('.faq-category-tabs');
         const highlightBox = document.querySelector('.faq-highlight-box');
 
-        // This little function turns raw URLs into clickable green links automatically!
-        function linkify(text) {
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            return text.replace(urlRegex, function(url) {
-                return `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${url}</a>`;
+        // THE SMART PARSER: Detects links and Drive files automatically
+        function formatContent(text) {
+            // Split the text by spaces or newlines
+            const words = text.split(/(\s+)/); 
+            
+            const processedWords = words.map(word => {
+                // Ignore empty spaces
+                if (!word.trim()) return word;
+
+                // 1. Detect Google Drive Links (Upgraded Thumbnail Endpoint)
+                if (word.includes('drive.google.com/file/d/')) {
+                    const match = word.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        const fileId = match[1];
+                        return `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w800" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
+                    }
+                }
+                
+                // 2. Detect normal image links (ending in png, jpg)
+                if (word.match(/\.(jpeg|jpg|gif|png)(\?.*)?$/i) && word.startsWith('http')) {
+                    return `<img src="${word}" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
+                }
+                
+                // 3. Detect normal web links and make them clickable
+                if (word.startsWith('http://') || word.startsWith('https://')) {
+                    return `<a href="${word}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600; word-break: break-all;">${word}</a>`;
+                }
+                
+                // Return normal text untouched
+                return word;
             });
+
+            return processedWords.join('');
         }
 
         faqData.forEach(item => {
@@ -70,8 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (section) {
                 const styles = styleMap[catKey] || styleMap['default'];
                 
-                // We pass the answer through our new linkify function here
-                const formattedAnswer = linkify(item.answer);
+                // Run Mathilde's answer through the Smart Parser before displaying it
+                const formattedAnswer = formatContent(item.answer);
                 
                 const faqHTML = `
                   <div class="faq-item">
