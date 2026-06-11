@@ -38,39 +38,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const tabsContainer = document.querySelector('.faq-category-tabs');
         const highlightBox = document.querySelector('.faq-highlight-box');
 
+        // This little function turns raw URLs into clickable green links automatically!
+        function linkify(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${url}</a>`;
+            });
+        }
+
         faqData.forEach(item => {
-            // Trim whitespace just in case
             const sheetCategory = item.category.trim();
             let catKey = categoryMap[sheetCategory];
 
-            // IF THIS IS A BRAND NEW CATEGORY NOT IN OUR MAP:
             if (!catKey) {
-                // Generate a safe HTML key (e.g., "BEst" becomes "best")
                 catKey = sheetCategory.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                
-                // Add it to the map so we don't duplicate it if there are multiple questions in this new category
                 categoryMap[sheetCategory] = catKey;
 
-                // Dynamically build the new Tab HTML
                 const tabHTML = `<div class="tab" data-target="${catKey}">${sheetCategory}</div>`;
                 tabsContainer.insertAdjacentHTML('beforeend', tabHTML);
 
-                // Dynamically build the new Section HTML
                 const sectionHTML = `
                   <div class="faq-section" data-category="${catKey}" style="display: none;">
                     <div class="faq-section-label" style="margin-top:20px;">${sheetCategory}</div>
                   </div>
                 `;
-                // Inject the new section right before the contact box
                 highlightBox.insertAdjacentHTML('beforebegin', sectionHTML);
             }
 
-            // Now find the section (whether it was hardcoded or just created dynamically)
             const section = document.querySelector(`.faq-section[data-category="${catKey}"]`);
 
             if (section) {
-                // Grab the styling (uses default if it's a new category)
                 const styles = styleMap[catKey] || styleMap['default'];
+                
+                // We pass the answer through our new linkify function here
+                const formattedAnswer = linkify(item.answer);
                 
                 const faqHTML = `
                   <div class="faq-item">
@@ -79,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       <span class="faq-question">${item.question}</span>
                       <i class="ti ti-chevron-down faq-chevron"></i>
                     </div>
-                    <div class="faq-answer">${item.answer}</div>
+                    <div class="faq-answer">${formattedAnswer}</div>
                   </div>
                 `;
                 section.insertAdjacentHTML('beforeend', faqHTML);
