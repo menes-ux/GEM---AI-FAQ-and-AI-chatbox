@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. RENDER THE DATA INTO HTML (NOW FULLY DYNAMIC)
     function renderFAQs(faqData) {
         const tabsContainer = document.querySelector('.faq-category-tabs');
-        const highlightBox = document.querySelector('.faq-highlight-box');
+        const mainContainer = document.querySelector('.faq-body'); // 🔄 Now targeting the main container
 
         // THE SMART PARSER: Detects links and Drive files automatically
         function formatContent(text) {
@@ -84,12 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tabHTML = `<div class="tab" data-target="${catKey}">${sheetCategory}</div>`;
                 tabsContainer.insertAdjacentHTML('beforeend', tabHTML);
 
+                // 🔄 Safely injects new sections at the bottom of the main container
                 const sectionHTML = `
                   <div class="faq-section" data-category="${catKey}" style="display: none;">
                     <div class="faq-section-label" style="margin-top:20px;">${sheetCategory}</div>
                   </div>
                 `;
-                highlightBox.insertAdjacentHTML('beforebegin', sectionHTML);
+                mainContainer.insertAdjacentHTML('beforeend', sectionHTML);
             }
 
             const section = document.querySelector(`.faq-section[data-category="${catKey}"]`);
@@ -97,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (section) {
                 const styles = styleMap[catKey] || styleMap['default'];
                 
-                // Run Mathilde's answer through the Smart Parser before displaying it
+                // Run the answer through the Smart Parser before displaying it
                 const formattedAnswer = formatContent(item.answer);
                 
                 const faqHTML = `
