@@ -40,14 +40,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // THE SMART PARSER: Detects links and Drive files automatically
         function formatContent(text) {
-            // Split the text by spaces or newlines
-            const words = text.split(/(\s+)/); 
+            if (!text) return '';
+
+            // 1. TOKENIZE: Protect Markdown links from being broken apart by space-splitting
+            const markdownPlaceholders = [];
+            let tokenizedText = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
+                const htmlLink = `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${linkText}</a>`;
+                markdownPlaceholders.push(htmlLink);
+                // Return a temporary string with no spaces
+                return `__MARKDOWN_LINK_TOKEN_${markdownPlaceholders.length - 1}__`;
+            });
+
+            // 2. PROCESS WORDS: Split the remaining text safely by spaces
+            const words = tokenizedText.split(/(\s+)/); 
             
             const processedWords = words.map(word => {
-                // Ignore empty spaces
                 if (!word.trim()) return word;
 
-                // 1. Detect Google Drive Links (Upgraded Thumbnail Endpoint)
+                // Skip processing if this is our protected markdown placeholder
+                if (word.startsWith('__MARKDOWN_LINK_TOKEN_')) return word;
+
+                // Detect Google Drive Links
                 if (word.includes('drive.google.com/file/d/')) {
                     const match = word.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
                     if (match && match[1]) {
@@ -56,21 +69,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                // 2. Detect normal image links (ending in png, jpg)
+                // Detect normal loose image links (ending in png, jpg)
                 if (word.match(/\.(jpeg|jpg|gif|png)(\?.*)?$/i) && word.startsWith('http')) {
                     return `<img src="${word}" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
                 }
                 
-                // 3. Detect normal web links and make them clickable
+                // Detect loose web links and make them clickable
                 if (word.startsWith('http://') || word.startsWith('https://')) {
                     return `<a href="${word}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600; word-break: break-all;">${word}</a>`;
                 }
                 
-                // Return normal text untouched
                 return word;
             });
 
-            return processedWords.join('');
+            // Rejoin everything back into a single string
+            let finalHTML = processedWords.join('');
+
+            // 3. RESTORE: Swap the placeholder tokens back out for your rich HTML links
+            markdownPlaceholders.forEach((htmlLink, index) => {
+                finalHTML = finalHTML.replace(`__MARKDOWN_LINK_TOKEN_${index}__`, htmlLink);
+            });
+
+            return finalHTML;
         }
 
         faqData.forEach(item => {
