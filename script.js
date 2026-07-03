@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
+    // ⚠️ GOOGLE APPS SCRIPT WEB APP URL
     const API_URL = 'https://script.google.com/macros/s/AKfycbzvZdNKo6W3WP28RUNXobzMUmNyMSnjLkdVH_nn67gGaCrHzFRwfthW5kYjdSXWMQd3/exec';
 
     // Map the Google Sheet categories to your HTML data-category attributes
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "documents": { icon: "ti-file-certificate", color: "icon-navy" },
         "recruitment": { icon: "ti-git-branch", color: "icon-red" },
         "employment": { icon: "ti-cash", color: "icon-green" },
-        "default": { icon: "ti-help", color: "icon-green" } // The fallback style for new categories
+        "default": { icon: "ti-help", color: "icon-green" } 
     };
 
     // 1. FETCH DATA FROM GOOGLE SHEETS
@@ -33,81 +33,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. RENDER THE DATA INTO HTML (NOW FULLY DYNAMIC)
+    // 2. RENDER THE DATA INTO HTML
     function renderFAQs(faqData) {
         const tabsContainer = document.querySelector('.faq-category-tabs');
-        const mainContainer = document.querySelector('.faq-body'); // 🔄 Now targeting the main container
+        const mainContainer = document.querySelector('.faq-body'); 
 
         // THE SMART PARSER: Detects links and Drive files automatically
+        // THE SMART PARSER: Cleaner, safer, and won't break your links!
         function formatContent(text) {
             if (!text) return '';
-
-            // 1. TOKENIZE: Protect Markdown links from being broken apart by space-splitting
-            const markdownPlaceholders = [];
-            let tokenizedText = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
-                const htmlLink = `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${linkText}</a>`;
-                markdownPlaceholders.push(htmlLink);
-                // Return a temporary string with no spaces
-                return `__MARKDOWN_LINK_TOKEN_${markdownPlaceholders.length - 1}__`;
-            });
-
-            // 2. PROCESS WORDS: Split the remaining text safely by spaces
-            const words = tokenizedText.split(/(\s+)/); 
             
-            const processedWords = words.map(word => {
-                if (!word.trim()) return word;
+            // Force it to be a string just in case Google Sheets sends a number
+            let html = String(text);
 
-                // Skip processing if this is our protected markdown placeholder
-                if (word.startsWith('__MARKDOWN_LINK_TOKEN_')) return word;
-
-                // Detect Google Drive Links
-                if (word.includes('drive.google.com/file/d/')) {
-                    const match = word.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-                    if (match && match[1]) {
-                        const fileId = match[1];
-                        return `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w800" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
-                    }
-                }
-                
-                // Detect normal loose image links (ending in png, jpg)
-                if (word.match(/\.(jpeg|jpg|gif|png)(\?.*)?$/i) && word.startsWith('http')) {
-                    return `<img src="${word}" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
-                }
-                
-                // Detect loose web links and make them clickable
-                if (word.startsWith('http://') || word.startsWith('https://')) {
-                    return `<a href="${word}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600; word-break: break-all;">${word}</a>`;
-                }
-                
-                return word;
+            // 1. Detect Google Drive Links and turn them into image thumbnails
+            html = html.replace(/https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/[^\s]*)?/g, (match, fileId) => {
+                return `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w800" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
             });
 
-            // Rejoin everything back into a single string
-            let finalHTML = processedWords.join('');
-
-            // 3. RESTORE: Swap the placeholder tokens back out for your rich HTML links
-            markdownPlaceholders.forEach((htmlLink, index) => {
-                finalHTML = finalHTML.replace(`__MARKDOWN_LINK_TOKEN_${index}__`, htmlLink);
+            // 2. Convert Markdown links into clean, clickable HTML: [Click Here](https://...)
+            html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
+                return `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${linkText}</a>`;
             });
 
-            return finalHTML;
+            // 3. Safely preserve paragraph line breaks from your Google Sheet
+            html = html.replace(/\n/g, '<br>');
+
+            return html;
         }
 
         faqData.forEach(item => {
             const sheetCategory = item.category.trim();
             let catKey = categoryMap[sheetCategory];
 
+            // If it's a completely brand new category not in our map setup
             if (!catKey) {
                 catKey = sheetCategory.toLowerCase().replace(/[^a-z0-9]/g, '-');
                 categoryMap[sheetCategory] = catKey;
+            }
 
-                const tabHTML = `<div class="tab" data-target="${catKey}">${sheetCategory}</div>`;
-                tabsContainer.insertAdjacentHTML('beforeend', tabHTML);
+            // 🔥 FIX: If the tab & section don't exist in Claude's clean box yet, build them dynamically!
+            if (!document.querySelector(`.tab[data-target="${catKey}"]`)) {
+                
+                // Don't duplicate the 'All' tab if it's already there
+                if (catKey !== 'all') {
+                    const tabHTML = `<div class="tab" data-target="${catKey}">${sheetCategory}</div>`;
+                    tabsContainer.insertAdjacentHTML('beforeend', tabHTML);
+                }
 
-                // 🔄 Safely injects new sections at the bottom of the main container
                 const sectionHTML = `
                   <div class="faq-section" data-category="${catKey}" style="display: none;">
-                    <div class="faq-section-label" style="margin-top:20px;">${sheetCategory}</div>
+                    <div class="faq-section-label" style="margin-top:20px; font-weight:700; color:#509E2F; font-size:12px; letter-spacing:1px; margin-bottom:15px;">${sheetCategory}</div>
                   </div>
                 `;
                 mainContainer.insertAdjacentHTML('beforeend', sectionHTML);
@@ -117,8 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (section) {
                 const styles = styleMap[catKey] || styleMap['default'];
-                
-                // Run the answer through the Smart Parser before displaying it
                 const formattedAnswer = formatContent(item.answer);
                 
                 const faqHTML = `
@@ -142,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const faqSections = document.querySelectorAll('.faq-section');
         const tabs = document.querySelectorAll('.tab');
         const searchBar = document.querySelector('.faq-search-bar');
-        const searchInputText = document.querySelector('.search-text');
 
         // Accordion Setup
         faqItems.forEach(item => {
@@ -175,20 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Search Setup
-        if (searchBar && searchInputText) {
-            const inputField = document.createElement('input');
-            inputField.type = 'text';
-            inputField.placeholder = 'Search a question, e.g. "visa", "salary", "deadline"...';
-            inputField.style.cssText = "border:none; outline:none; width:100%; font-size:13px; font-family:'Montserrat',sans-serif; color:#353735; background:transparent;";
-
-            searchInputText.replaceWith(inputField);
-
-            inputField.addEventListener('input', (e) => {
+        if (searchBar) {
+            searchBar.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 
                 if (query.length > 0) {
                     tabs.forEach(t => t.classList.remove('active'));
-                    tabs[0].classList.add('active'); 
+                    const allTab = document.querySelector('.tab[data-target="all"]');
+                    if(allTab) allTab.classList.add('active'); 
                 }
 
                 faqSections.forEach(section => {
@@ -209,6 +176,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     section.style.display = sectionHasMatches ? 'block' : 'none';
                 });
+            });
+        }
+
+        // Auto-click 'All' tab to display everything beautifully on first launch
+        const initialTab = document.querySelector('.tab[data-target="all"]');
+        if (initialTab) {
+            initialTab.click();
+        }
+
+        // --- CHAT MESSAGES LOGIC ---
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        
+        let chatHistory = []; // This array acts as GEM's short-term memory!
+
+        async function handleUserMessage() {
+            const messageText = chatInput.value.trim();
+            if (!messageText) return; 
+
+            // 1. Show user message
+            chatMessages.insertAdjacentHTML('beforeend', `<div class="message user-message">${messageText}</div>`);
+            chatInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 2. Show thinking state
+            const thinkingId = 'thinking-' + Date.now();
+            chatMessages.insertAdjacentHTML('beforeend', `<div class="message gem-message" id="${thinkingId}"><i>GEM is thinking... 🤖</i></div>`);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 3. Send request to your Apps Script Web App
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    // Sending as text/plain prevents CORS preflight errors in Google Apps Script
+                    body: JSON.stringify({ 
+                        message: messageText, 
+                        history: chatHistory 
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove thinking bubble safely
+                const thinkingElement = document.getElementById(thinkingId);
+                if (thinkingElement) thinkingElement.remove();
+                
+                // 🚨 CHECK FOR BACKEND ERRORS BEFORE PROCEEDING
+                if (data.error) {
+                    console.error("GOOGLE APPS SCRIPT ERROR:", data.error);
+                    chatMessages.insertAdjacentHTML('beforeend', `<div class="message gem-message" style="color:red;"><i>Backend error: ${data.error}</i></div>`);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    return; // Stop the function here
+                }
+
+                if (!data.reply) {
+                    throw new Error("No reply received from server.");
+                }
+
+                // Clean up Gemini's markdown formatting
+                const formattedReply = data.reply
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+                
+                // Show real answer
+                chatMessages.insertAdjacentHTML('beforeend', `<div class="message gem-message">${formattedReply}</div>`);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // 5. Save the interaction to memory
+                chatHistory.push({ role: 'user', text: messageText });
+                chatHistory.push({ role: 'model', text: data.reply });
+
+                // Keep memory light
+                if(chatHistory.length > 6) chatHistory = chatHistory.slice(-6);
+
+            } catch (error) {
+                console.error("Chat Error:", error);
+                const thinkingElement = document.getElementById(thinkingId);
+                if (thinkingElement) thinkingElement.remove();
+                
+                chatMessages.insertAdjacentHTML('beforeend', `<div class="message gem-message" style="color:red;"><i>Oops! My connection dropped. Can you try asking again?</i></div>`);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Trigger message send via button or Enter key
+        if (sendChatBtn && chatInput) {
+            sendChatBtn.addEventListener('click', handleUserMessage);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleUserMessage();
+            });
+        }
+
+    // --- CHAT WIDGET TOGGLE ---
+        const chatFab = document.querySelector('.ask-gem-fab');
+        const chatWidget = document.getElementById('chatWidget');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+
+        if (chatFab && chatWidget && closeChatBtn) {
+            chatFab.addEventListener('click', () => {
+                chatWidget.classList.add('open');
+            });
+
+            closeChatBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevents the FAB click from refiring immediately
+                chatWidget.classList.remove('open');
             });
         }
     }
