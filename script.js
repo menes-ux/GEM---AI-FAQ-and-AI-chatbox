@@ -43,20 +43,39 @@ document.addEventListener('DOMContentLoaded', () => {
         function formatContent(text) {
             if (!text) return '';
             
-            // Force it to be a string just in case Google Sheets sends a number
             let html = String(text);
 
-            // 1. Detect Google Drive Links and turn them into image thumbnails
-            html = html.replace(/https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/[^\s]*)?/g, (match, fileId) => {
-                return `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w800" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
-            });
-
-            // 2. Convert Markdown links into clean, clickable HTML: [Click Here](https://...)
+            // 1. FIRST: Convert Markdown links [Click Here](https://...) into clean HTML links
+            // This runs first so Drive links wrapped in markdown text don't get turned into blocks!
             html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
                 return `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${linkText}</a>`;
             });
 
-            // 3. Safely preserve paragraph line breaks from your Google Sheet
+            // 2. SECOND: Handle standalone Google Drive Links for media embedding
+            // The (?<!href=")(?<!href=') check guarantees it ignores links already turned into text links above
+            const driveRegex = /(?<!href=")(?<!href=')https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/[^\s"<)]*)?/g;
+
+            html = html.replace(driveRegex, (match, fileId) => {
+                // Smart check: Does the row text mention "video" or have a video extension?
+                const isVideo = match.toLowerCase().includes('video') || 
+                                match.toLowerCase().includes('.mp4') || 
+                                match.toLowerCase().includes('.mov') ||
+                                html.toLowerCase().includes('video');
+
+                if (isVideo) {
+                    // Render a responsive, interactive embedded video player from Drive
+                    return `
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; margin: 12px 0; border: 1px solid #E8E9E5;">
+                            <iframe src="https://drive.google.com/file/d/${fileId}/preview" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="autoplay" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else {
+                    // Render a clean static image thumbnail from Drive
+                    return `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w800" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
+                }
+            });
+
+            // 3. THIRD: Safely preserve paragraph line breaks from your Google Sheet
             html = html.replace(/\n/g, '<br>');
 
             return html;
