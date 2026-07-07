@@ -254,10 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("No reply received from server.");
                 }
 
-                // Clean up Gemini's markdown formatting
-                const formattedReply = data.reply
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br>');
+                // Clean up Gemini's markdown formatting using the ultimate utility function
+                const formattedReply = formatChatReply(data.reply);
                 
                 // Show real answer
                 chatMessages.insertAdjacentHTML('beforeend', `<div class="message gem-message">${formattedReply}</div>`);
@@ -308,3 +306,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Run the fetch
     fetchFAQData();
 });
+
+// LE FORMATEUR ULTIME POUR LE CHATBOT (Texte, Liens, Images, Vidéos)
+function formatChatReply(text) {
+    if (!text) return '';
+
+    let formatted = text;
+
+    // 1. GESTION DES IMAGES : ![texte](url) -> Devient une vraie image visible
+    formatted = formatted.replace(/!\[(.*?)\]\((https?:\/\/[^\s)]+)\)/g, 
+        '<img src="$2" alt="$1" style="max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">'
+    );
+
+    // 2. GESTION DES VIDÉOS DIRECTES : [titre](url.mp4) -> Devient un lecteur vidéo intégré
+    formatted = formatted.replace(/\[(.*?)\]\((https?:\/\/[^\s)]+\.(mp4|webm|ogg))\)/g, 
+        '<div style="margin: 8px 0;"><video controls style="max-width: 100%; border-radius: 8px; display:block;"><source src="$2" type="video/$3">Votre navigateur ne supporte pas la vidéo.</video></div>'
+    );
+
+    // 3. GESTION DES LIENS & HYPERTEXTES : [texte](url) -> Devient un beau lien vert cliquable
+    formatted = formatted.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, 
+        '<a href="$2" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600; word-break: break-all;">$1 🔗</a>'
+    );
+
+    // 4. GESTION DU GRAS : **texte** -> <strong>
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // 5. GESTION DES LISTES À PUCES : Convertit les "*" ou "-" en vrais points propres
+    formatted = formatted.replace(/^\s*[\*\-]\s+(.*)$/gm, '• $1');
+
+    // 6. GESTION DES RETOURS À LIGNE
+    formatted = formatted.replace(/\n/g, '<br>');
+
+    return formatted;
+}
