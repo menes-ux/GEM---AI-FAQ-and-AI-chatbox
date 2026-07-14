@@ -2,13 +2,79 @@ document.addEventListener('DOMContentLoaded', () => {
     // ⚠️ GOOGLE APPS SCRIPT WEB APP URL
     const API_URL = 'https://script.google.com/macros/s/AKfycbzvZdNKo6W3WP28RUNXobzMUmNyMSnjLkdVH_nn67gGaCrHzFRwfthW5kYjdSXWMQd3/exec';
 
-    // Map the Google Sheet categories to your HTML data-category attributes
+    // 👉 LA VARIABLE DOIT ÊTRE ICI
+    let currentLang = 'en';
+
+    // Ton écouteur pour le bouton
+    const langBtn = document.getElementById('lang-switch');
+    if (langBtn) {
+        langBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); 
+            
+            // 1. On active le mode "chargement" sur le bouton
+            langBtn.classList.add('is-loading');
+            langBtn.innerText = "Loading... ⏳";
+            
+            // 2. 🪄 LA MAGIE : On affiche un Loader ultra clean à la place des questions
+            const mainContainer = document.querySelector('.faq-body');
+            const tabsContainer = document.querySelector('.faq-category-tabs');
+            
+            if (mainContainer && tabsContainer) {
+                tabsContainer.innerHTML = ''; // On cache les catégories le temps du chargement
+                mainContainer.innerHTML = `
+                    <div style="text-align: center; padding: 60px 0; opacity: 0; animation: fadeInUp 0.4s forwards;">
+                        <div style="width: 40px; height: 40px; border: 4px solid #E8E9E5; border-top: 4px solid #509E2F; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="margin-top: 20px; color: #509E2F; font-weight: 600; letter-spacing: 0.5px;">💎</p>
+                    </div>
+                `;
+            }
+            
+            // 3. On bascule la langue
+            currentLang = (currentLang === 'en') ? 'fr' : 'en';
+            // 3.5 Traduction des textes fixes de la page
+            const mainTitle = document.getElementById('hero-title');
+            const subtitle = document.getElementById('hero-subtitle');
+            const searchInput = document.getElementById('search-input');
+
+            if (currentLang === 'fr') {
+                if (mainTitle) mainTitle.innerText = "Des questions ? Nous avons les réponses.";
+                if (subtitle) subtitle.innerText = "Tout ce que vous devez savoir pour rejoindre Enko Education en tant qu'enseignant — de la candidature à votre premier jour.";
+                if (searchInput) searchInput.placeholder = "Rechercher une question, ex. 'Quels documents dois-je fournir ?'";
+            } else {
+                if (mainTitle) mainTitle.innerText = "Got questions? We've got answers.";
+                if (subtitle) subtitle.innerText = "Everything you need to know about joining Enko Education as a teacher — from application to your first day.";
+                if (searchInput) searchInput.placeholder = "Search a question, e.g. 'What documents do I need?'";
+            }
+            
+            // 4. On attend que Google Apps Script fasse son travail
+            await fetchFAQData();
+            
+            // 5. Google a répondu ! On remet le bouton à la normale
+            langBtn.classList.remove('is-loading');
+            if (currentLang === 'fr') {
+                langBtn.innerText = "Click here for English version!";
+            } else {
+                langBtn.innerText = "Clicker ici pour la version française!";
+            }
+        });
+    }
+
+    // Ensuite tes autres variables (categoryMap, styleMap, etc...)
+
     const categoryMap = {
+        // 🇬🇧 Catégories Anglaises
         "Application Info": "application",
         "Platform Support": "platform",
         "Document Rules": "documents",
         "Recruitment & Pipeline": "recruitment",
-        "Employment & Benefits": "employment"
+        "Employment & Benefits": "employment",
+        
+        // 🇫🇷 Catégories Françaises (ajuste les noms si besoin)
+        "Informations Candidature": "application",
+        "Support Plateforme": "platform",
+        "Règles Documentaires": "documents",
+        "Recrutement & Vivier": "recruitment",
+        "Emploi & Avantages": "employment"
     };
 
     // Map specific icons and colors to each category
@@ -24,7 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. FETCH DATA FROM GOOGLE SHEETS
     async function fetchFAQData() {
         try {
-            const response = await fetch(API_URL);
+            // On ajoute la langue à l'URL pour demander le bon onglet
+            const response = await fetch(`${API_URL}?lang=${currentLang}`);
             const data = await response.json();
             renderFAQs(data);
             initializeInteractions(); 
@@ -33,44 +100,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. RENDER THE DATA INTO HTML
+// 2. RENDER THE DATA INTO HTML
     function renderFAQs(faqData) {
         const tabsContainer = document.querySelector('.faq-category-tabs');
         const mainContainer = document.querySelector('.faq-body'); 
+        
+        // Le bon label selon la langue
+        const allLabel = (currentLang === 'fr') ? 'Tout' : 'All';
+
+        // 👉 On met LE BON TAG, et on ne l'écrase pas en dessous !
+        tabsContainer.innerHTML = `<div class="tab active" data-target="all">${allLabel}</div>`;
+        mainContainer.innerHTML = '';
 
         // THE SMART PARSER: Detects links and Drive files automatically
-        // THE SMART PARSER: Cleaner, safer, and won't break your links!
         function formatContent(text) {
             if (!text) return '';
             
             let html = String(text);
 
             // 1. FIRST: Convert Markdown links [Click Here](https://...) into clean HTML links
-            // This runs first so Drive links wrapped in markdown text don't get turned into blocks!
             html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, linkText, url) => {
                 return `<a href="${url}" target="_blank" style="color: #509E2F; text-decoration: underline; font-weight: 600;">${linkText}</a>`;
             });
 
             // 2. SECOND: Handle standalone Google Drive Links for media embedding
-            // The (?<!href=")(?<!href=') check guarantees it ignores links already turned into text links above
             const driveRegex = /(?<!href=")(?<!href=')https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/[^\s"<)]*)?/g;
 
             html = html.replace(driveRegex, (match, fileId) => {
-                // Smart check: Does the row text mention "video" or have a video extension?
                 const isVideo = match.toLowerCase().includes('video') || 
                                 match.toLowerCase().includes('.mp4') || 
                                 match.toLowerCase().includes('.mov') ||
                                 html.toLowerCase().includes('video');
 
                 if (isVideo) {
-                    // Render a responsive, interactive embedded video player from Drive
                     return `
                         <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; margin: 12px 0; border: 1px solid #E8E9E5;">
                             <iframe src="https://drive.google.com/file/d/${fileId}/preview" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="autoplay" allowfullscreen></iframe>
                         </div>
                     `;
                 } else {
-                    // Render a clean static image thumbnail from Drive
                     return `<img src="https://drive.google.com/thumbnail?id=${fileId}&sz=w800" style="max-width: 100%; border-radius: 8px; margin-top: 12px; margin-bottom: 12px; display: block; border: 1px solid #E8E9E5;" alt="FAQ visual">`;
                 }
             });
@@ -91,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 categoryMap[sheetCategory] = catKey;
             }
 
-            // 🔥 FIX: If the tab & section don't exist in Claude's clean box yet, build them dynamically!
+            // 🔥 FIX: Build tabs using the exact same structure as the "All" div!
             if (!document.querySelector(`.tab[data-target="${catKey}"]`)) {
                 
                 // Don't duplicate the 'All' tab if it's already there
@@ -306,6 +374,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Run the fetch
     fetchFAQData();
 });
+
+
+// === FONCTIONNALITÉ DE LA BARRE DE RECHERCHE ===
+    const searchInput = document.getElementById('search-input');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase(); // On passe tout en minuscules
+            const allFaqItems = document.querySelectorAll('.faq-item'); // On récupère toutes les questions
+            
+            allFaqItems.forEach(item => {
+                const questionText = item.querySelector('.faq-question').innerText.toLowerCase();
+                const answerText = item.querySelector('.faq-answer').innerText.toLowerCase();
+                
+                // Si le texte tapé est dans la question OU dans la réponse, on l'affiche
+                if (questionText.includes(searchTerm) || answerText.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    // Sinon on le cache
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
 
 // LE FORMATEUR ULTIME POUR LE CHATBOT (Texte, Liens, Images, Vidéos)
 function formatChatReply(text) {
