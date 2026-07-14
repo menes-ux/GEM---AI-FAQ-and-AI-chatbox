@@ -538,6 +538,28 @@
         right: 15px; /* Décolle le bouton du bord de l'écran */
     }
 }
+
+/* --- RESPONSIVE CHAT BOT --- */
+@media (max-width: 768px) {
+    /* Remplace '.chatbot-container' par la vraie classe de ton chat bot */
+    .chatbot-container { 
+        width: 100% !important; /* Prend toute la largeur */
+        height: 100% !important; /* Prend toute la hauteur */
+        bottom: 0 !important; /* Colle au bord bas */
+        right: 0 !important; /* Colle au bord droit */
+        border-radius: 0 !important; /* Enlève les bords arrondis pour un effet "Plein écran" */
+        max-height: 100vh !important;
+        max-width: 100vw !important;
+        z-index: 9999 !important; /* S'assure qu'il passe au-dessus de tout le reste */
+    }
+
+    /* Si le chat bot a un bouton pour l'ouvrir (la bulle de chat) */
+    .chatbot-toggle-button {
+        bottom: 15px !important;
+        right: 15px !important;
+        transform: scale(0.85); /* Réduit un peu la taille de la bulle */
+    }
+}
     </style>
 </head>
 <body>
