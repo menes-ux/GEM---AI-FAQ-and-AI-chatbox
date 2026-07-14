@@ -508,13 +508,45 @@
 @keyframes spin { 
     100% { transform: rotate(360deg); } 
 }
+
+/* --- RESPONSIVE BOUTON LANGUE --- */
+
+/* Par défaut (Ordinateur) : on cache le texte mobile */
+.mobile-text { 
+    display: none; 
+}
+.desktop-text { 
+    display: inline; 
+}
+
+/* Sur petits écrans (Mobiles : max 768px) */
+@media (max-width: 768px) {
+    .desktop-text { 
+        display: none !important; /* On cache la longue phrase */
+    }
+    .mobile-text { 
+        display: inline !important; /* On affiche juste FR / ENG */
+        font-weight: 800; 
+        font-size: 14px; 
+    }
+    .lang-switch-btn { 
+        padding: 8px 16px; /* Bouton plus compact, forme de pilule */
+        min-width: unset;
+    }
+    .lang-btn-container {
+        top: 15px;
+        right: 15px; /* Décolle le bouton du bord de l'écran */
+    }
+}
     </style>
 </head>
 <body>
   <div class="page-wrapper">
+
     <div class="lang-btn-container">
     <a href="#" id="lang-switch" class="lang-switch-btn">
-        Clicker ici pour la version française!
+        <span class="desktop-text">Clicker ici pour la version française!</span>
+        <span class="mobile-text">FR</span>
     </a>
 </div>
     <header class="hero-header">

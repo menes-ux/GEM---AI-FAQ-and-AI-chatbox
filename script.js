@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 1. On active le mode "chargement" sur le bouton
             langBtn.classList.add('is-loading');
-            langBtn.innerText = "Loading... ⏳";
+            langBtn.innerHTML = '<span class="desktop-text">Loading... ⏳</span><span class="mobile-text">⏳</span>';
             
             // 2. 🪄 LA MAGIE : On affiche un Loader ultra clean à la place des questions
             const mainContainer = document.querySelector('.faq-body');
@@ -49,12 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // 4. On attend que Google Apps Script fasse son travail
             await fetchFAQData();
             
-            // 5. Google a répondu ! On remet le bouton à la normale
+           // 5. Google a répondu ! On remet le bouton à la normale
             langBtn.classList.remove('is-loading');
             if (currentLang === 'fr') {
-                langBtn.innerText = "Click here for English version!";
+                langBtn.innerHTML = '<span class="desktop-text">Click here for English version!</span><span class="mobile-text">ENG</span>';
             } else {
-                langBtn.innerText = "Clicker ici pour la version française!";
+                langBtn.innerHTML = '<span class="desktop-text">Clicker ici pour la version française!</span><span class="mobile-text">FR</span>';
             }
         });
     }
