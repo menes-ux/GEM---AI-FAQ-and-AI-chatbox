@@ -427,11 +427,45 @@
       .chat-input-container button:hover {
           background: #418225;
       }
+
+      .lang-btn-container {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    z-index: 10;
+}
+
+.lang-switch-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, 0.1); /* Fond blanc très transparent */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 8px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    display: inline-block;
+    transition: all 0.3s ease; /* Pour le hover fluide */
+}
+
+/* L'effet au survol (hover) */
+.lang-switch-btn:hover {
+    background-color: #ffffff;
+    color: #509E2F; /* Le vert Enko */
+    transform: translateY(-2px); /* Léger effet de surélévation */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
     </style>
 </head>
 <body>
   <div class="page-wrapper">
-    
+    <div class="lang-btn-container">
+    <a href="#" id="lang-switch" class="lang-switch-btn">
+        Clicker ici pour la version française!
+    </a>
+</div>
     <header class="hero-header">
       <div class="hero-content">
         <div class="header-logo-section">
@@ -445,6 +479,7 @@
         <h2 class="hero-main-title">Got questions? We've got answers.</h2>
         <p class="hero-subtitle">Everything you need to know about joining Enko Education as a teacher<br>— from application to your first day.</p>
       </div>
+      
     </header>
 
     <div class="search-container">
