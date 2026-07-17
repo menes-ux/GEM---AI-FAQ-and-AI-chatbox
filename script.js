@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentLang === 'fr') {
                 if (mainTitle) mainTitle.innerText = "Des questions ? Nous avons les réponses.";
-                if (subtitle) subtitle.innerText = "Tout ce que vous devez savoir pour rejoindre Enko Education en tant qu'enseignant — de la candidature à votre premier jour.";
+                if (subtitle) subtitle.innerText = "Tout ce que vous devez savoir pour rejoindre Enko Education en tant qu'enseignant(e) — de la candidature à votre premier jour.";
                 if (searchInput) searchInput.placeholder = "Rechercher une question, ex. 'Quels documents dois-je fournir ?'";
             } else {
                 if (mainTitle) mainTitle.innerText = "Got questions? We've got answers.";
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentLang === 'fr') {
                 langBtn.innerHTML = '<span class="desktop-text">Click here for English version!</span><span class="mobile-text">ENG</span>';
             } else {
-                langBtn.innerHTML = '<span class="desktop-text">Clicker ici pour la version française!</span><span class="mobile-text">FR</span>';
+                langBtn.innerHTML = '<span class="desktop-text">Cliquer ici pour la version française!</span><span class="mobile-text">FR</span>';
             }
         });
     }
