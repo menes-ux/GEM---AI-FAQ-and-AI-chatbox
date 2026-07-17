@@ -615,37 +615,43 @@
 
 
 
-    <div class="chat-widget" id="chatWidget">
-      <div class="chat-header">
-        <div class="chat-header-info">
-          <div class="gem-avatar">🤖</div>
-          <div>
-            <h3>Ask GEM</h3>
-            <p>Enko Education Assistant • Online</p>
-          </div>
-        </div>
-        <button class="chat-close-btn" id="closeChatBtn">
-          <i class="ti ti-x"></i>
-        </button>
-      </div>
-
-      <div class="chat-messages" id="chatMessages">
-        <div class="message gem-message">
-          Hi there! 👋 I'm GEM, your Enko Education guide. Ask me anything about our application process, teaching roles, or benefits!
-        </div>
-      </div>
-
-      <div class="chat-input-container">
-        <input type="text" id="chatInput" placeholder="Type your question here...">
-        <button id="sendChatBtn">
-          <i class="ti ti-send"></i>
-        </button>
+   <div class="chat-widget" id="chatWidget">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="gem-avatar">💎</div>
+      <div>
+        <!-- 1. ID ajouté ici 👇 -->
+        <h3 id="chatTitle">Ask GEM</h3>
+        <!-- 2. ID ajouté ici 👇 -->
+        <p id="chatSubtitle">Enko Education Assistant • Online</p>
       </div>
     </div>
-    <button class="ask-gem-fab">
-      <i class="ti ti-message-circle"></i>
-      Ask GEM
+    <button class="chat-close-btn" id="closeChatBtn">
+      <i class="ti ti-x"></i>
     </button>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <!-- 3. ID ajouté ici 👇 -->
+    <div class="message gem-message" id="chatWelcome">
+      Hi there! 👋 I'm GEM, your Enko Education guide. Ask me anything about our application process, teaching roles, or benefits!
+    </div>
+  </div>
+
+  <div class="chat-input-container">
+    <!-- L'input a déjà l'id chatInput, parfait ! -->
+    <input type="text" id="chatInput" placeholder="Type your question here...">
+    <button id="sendChatBtn">
+      <i class="ti ti-send"></i>
+    </button>
+  </div>
+</div>
+
+<button class="ask-gem-fab">
+  <i class="ti ti-message-circle"></i>
+  <!-- 4. On enveloppe le texte dans un span avec un ID pour ne pas effacer l'icône ! 👇 -->
+  <span id="chatFabText">Ask GEM</span>
+</button>
 
   </div>
   

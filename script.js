@@ -32,18 +32,43 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. On bascule la langue
             currentLang = (currentLang === 'en') ? 'fr' : 'en';
             // 3.5 Traduction des textes fixes de la page
+            // 3.5 Traduction des textes fixes de la page ET du Chatbot
             const mainTitle = document.getElementById('hero-title');
             const subtitle = document.getElementById('hero-subtitle');
             const searchInput = document.getElementById('search-input');
+            
+            // Les nouveaux sélecteurs pour le chatbot de Mathilde 🤖
+            const chatTitle = document.getElementById('chatTitle');
+            const chatSubtitle = document.getElementById('chatSubtitle');
+            const chatWelcome = document.getElementById('chatWelcome');
+            const chatInput = document.getElementById('chatInput');
+            const chatFabText = document.getElementById('chatFabText');
 
             if (currentLang === 'fr') {
+                // --- TEXTES PAGE ---
                 if (mainTitle) mainTitle.innerText = "Des questions ? Nous avons les réponses.";
-                if (subtitle) subtitle.innerText = "Tout ce que vous devez savoir pour rejoindre Enko Education en tant qu'enseignant(e) — de la candidature à votre premier jour.";
+                if (subtitle) subtitle.innerText = "Tout ce que vous devez savoir pour rejoindre Enko Education en tant qu'enseignant — de la candidature à votre premier jour.";
                 if (searchInput) searchInput.placeholder = "Rechercher une question, ex. 'Quels documents dois-je fournir ?'";
+                
+                // --- CHATBOT EN FRANÇAIS ---
+                if (chatTitle) chatTitle.innerText = "Posez vos questions";
+                if (chatSubtitle) chatSubtitle.innerText = "Assistant Enko Education • En ligne";
+                if (chatWelcome) chatWelcome.innerText = "Bonjour ! 👋 Je suis GEM, votre guide Enko Education. Posez-moi toutes vos questions sur notre processus de candidature, nos postes d'enseignants ou nos avantages !";
+                if (chatInput) chatInput.placeholder = "Tapez votre question ici...";
+                if (chatFabText) chatFabText.innerText = "Posez vos questions";
+
             } else {
+                // --- TEXTES PAGE ---
                 if (mainTitle) mainTitle.innerText = "Got questions? We've got answers.";
                 if (subtitle) subtitle.innerText = "Everything you need to know about joining Enko Education as a teacher — from application to your first day.";
                 if (searchInput) searchInput.placeholder = "Search a question, e.g. 'What documents do I need?'";
+                
+                // --- CHATBOT EN ANGLAIS ---
+                if (chatTitle) chatTitle.innerText = "Ask GEM";
+                if (chatSubtitle) chatSubtitle.innerText = "Enko Education Assistant • Online";
+                if (chatWelcome) chatWelcome.innerText = "Hi there! 👋 I'm GEM, your Enko Education guide. Ask me anything about our application process, teaching roles, or benefits!";
+                if (chatInput) chatInput.placeholder = "Type your question here...";
+                if (chatFabText) chatFabText.innerText = "Ask GEM";
             }
             
             // 4. On attend que Google Apps Script fasse son travail
